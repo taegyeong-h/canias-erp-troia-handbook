@@ -18,14 +18,14 @@
 
 ---
 
-## 📂 문서 목차 (Contents)
+### 📂 문서 목차 (Contents)
 
-### 0. Foundation (기초 및 공통)
+#### 0. Foundation (기초 및 공통)
 
-### 1. SD - Sales & Distribution (영업 관리)
+#### 1. SD - Sales & Distribution (영업 관리)
 
-### 2. MM - Materials Management (자재 / 구매)
+#### 2. MM - Materials Management (자재 / 구매)
 
-### 3. PP - Production Planning (생산 관리)
+#### 3. PP - Production Planning (생산 관리)
 
-### 4. FI/CO - Finance & Controlling (재무회계 / 관리경영)
+#### 4. FI/CO - Finance & Controlling (재무회계 / 관리경영)
