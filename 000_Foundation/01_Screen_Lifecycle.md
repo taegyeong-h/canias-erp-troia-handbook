@@ -2,6 +2,20 @@
 
 ---
 
+## 🌐 Spring MVC ↔ TROIA (Canias ERP) 1:1 아키텍처 매핑
+
+TROIA 개발 환경은 웹 백엔드의 전형적인 이벤트 기반 **MVC (Model-View-Controller) 패턴**과 동일한 구조로 동작합니다.
+
+| MVC 구분 | Spring MVC (웹) | TROIA (Canias ERP) | 역할 설명 |
+| :--- | :--- | :--- | :--- |
+| **View (V)** | Mustache / HTML 템플릿 | **IDE Design 캔버스 & Properties** | 화면 뼈대, 컨트롤 배치, 콤보박스 `Captions` 등 눈에 보이는 고정 레이아웃 |
+| **Controller (C)** | `@Controller` / `@PostMapping` | **이벤트 스크립트 (`AFTER`, `Click`)** | 유저 조작 감지, 화면 전환(`CALLDIALOG`), 데이터 검증 및 로직 제어 |
+| **Model (M)** | Entity / Repository / DB | **`DEVT01` DB 테이블 & `SAVEDATA`** | 데이터 구조 정의, 실제 DB 쿼리 실행 및 트랜잭션 커밋 |
+
+---
+
+
+
 ## ❓ Q&A 핵심 정리
 
 * **Q1. 상세페이지 팝업창도 0~2단계 (`BEFORE` → `AFTER` → `ONSHOW`)를 거치나요?**
@@ -28,3 +42,4 @@
 [1. 메인창 [+] 클릭] ──> [2. 회원가입창 켜짐] ──> [3. 콤보박스 클릭] ──> [4. [저장] 클릭]
    BTN_ADD.Click          BEFORE -> AFTER -> ONSHOW      Properties(목록)         BTN_SAVE.Click
                                                          -> GRADE.Click          -> SAVEDATA (DB)
+```
