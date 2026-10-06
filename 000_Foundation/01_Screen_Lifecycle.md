@@ -9,12 +9,35 @@ TROIA 개발 환경은 웹 백엔드의 전형적인 이벤트 기반 **MVC (Mod
 | MVC 구분 | Spring MVC (웹) | TROIA (Canias ERP) | 역할 설명 |
 | :--- | :--- | :--- | :--- |
 | **View (V)** | Mustache / HTML 템플릿 | **IDE Design 캔버스 & Properties** | 화면 뼈대, 컨트롤 배치, 콤보박스 `Captions` 등 눈에 보이는 고정 레이아웃 |
-| **Controller (C)** | `@Controller` / `@PostMapping` | **이벤트 스크립트 (`AFTER`, `Click`)** | 유저 조작 감지, 화면 전환(`CALLDIALOG`), 데이터 검증 및 로직 제어 |
-| **Model (M)** | Entity / Repository / DB | **`DEVT01` DB 테이블 & `SAVEDATA`** | 데이터 구조 정의, 실제 DB 쿼리 실행 및 트랜잭션 커밋 |
+| **Controller (C)** | `@Controller` / `@PostMapping` | **이벤트 스크립트 (`BEFORE`, `AFTER`, `Click`)** | 유저 조작 감지, 화면 전환(`CALLDIALOG`), 데이터 검증 및 로직 제어 |
+| **Model (M)** | Entity / Repository / DB | **`DFC...` DB 테이블 & 백엔드 Class** | 데이터 구조 정의, 실제 DB 쿼리 실행 및 트랜잭션 커밋[cite: 18] |
 
 ---
 
+## 💡 단계별 상세 동작 원리
 
+> ### 1. BEFORE — 클래스의 객체화 (Memory Allocation)
+> **핵심 역할:** 백엔드 설계도(`Class`)를 바탕으로 실체 데이터 변수(`Object`)를 메모리에 미리 생성합니다[cite: 18].
+> 
+> * **특징:** 화면 부품(컴포넌트)들이 그려지기 전 시점입니다.
+> * **이유:** 스크립트가 사용할 객체 변수(`...REC`)를 메모리에 최우선 할당하기 위함입니다[cite: 18].
+> 
+> ⚠️ **주의:** UI 컴포넌트가 존재하지 않는 시점이므로, `BEFORE`에서 입력창이나 그리드 표 컴포넌트를 직접 조작하면 `"컴포넌트를 찾을 수 없다"`는 에러가 발생합니다.
+
+> ### 2. AFTER — 컴포넌트 세팅 및 데이터 바인딩 (UI Control)
+> **핵심 역할:** `BEFORE` 이후 UI 컴포넌트들이 실체화된 직후 실행됩니다.
+> 
+> **주요 작업:**
+> * 메인 창의 목록 그리드 컴포넌트에 컬럼 제목 바인딩 (`PREPVIEW`)[cite: 19]
+> * 표의 컬럼 너비를 화면 크기에 맞게 자동 재조정 (`RESIZE`)[cite: 19]
+> * 특정 입력 상자의 비활성화(`READONLY`) 속성 동적 변경
+
+> ### 3. ONSHOW — 데이터 로딩 및 화면 노출 (Data Fetching)
+> **핵심 역할:** 화면 세팅 완료 후 유저에게 팝업창이 표시되는 순간 실행됩니다.
+> 
+> **주요 작업:** DB 데이터를 조회해 와서 세팅된 컴포넌트나 객체 변수에 값을 채워 넣습니다.
+
+---
 
 ## ❓ Q&A 핵심 정리
 
@@ -23,16 +46,15 @@ TROIA 개발 환경은 웹 백엔드의 전형적인 이벤트 기반 **MVC (Mod
 
 * **Q2. 콤보박스를 누를 때 목록('최우수, 우수, 보통')이 나오는 건 `Click` 스크립트인가요, 버튼의 Properties 속성인가요?**
   * **0단계 IDE Properties 설정값**이 보여지는 것입니다. 드롭다운 목록이 펼쳐지는 것은 스크립트가 실행되는 것이 아니라, IDE Properties 패널의 `Captions` 속성에 적어둔 글자가 화면에 노출되는 UI 기본 동작입니다.
-
-  * **[1차 클릭 - 목록 펼침]:** 콤보박스 상자를 눌러 목록이 펼쳐지는 것은 **스크립트가 실행** 되는 것이 아니라, IDE Properties 패널의 `Captions` 속성에 적어둔 글자를 UI 엔진이 출력하는 기본 동작입니다.
-  * **[2차 클릭 - 항목 선택]:** 펼쳐진 목록 중 '우수'를 클릭하여 **선택을 완료하는 순간**, 개발자가 작성한 **`GRADE.Click` / `Change` 스크립트가 구동**되어 다른 버튼이나 DB 변수값을 'B'로 실시간 변경합니다.
+  * **[1차 클릭 - 목록 펼침]:** 콤보박스 상자를 눌러 목록이 펼쳐지는 것은 스크립트가 실행되는 것이 아니라, IDE Properties 패널의 `Captions` 속성에 적어둔 글자를 UI 엔진이 출력하는 기본 동작입니다.
+  * **[2차 클릭 - 항목 선택]:** 펼쳐진 목록 중 '우수'를 클릭하여 선택을 완료하는 순간, 개발자가 작성한 **`GRADE.Click` / `Change`** 스크립트가 구동되어 다른 버튼이나 DB 변수값을 'B'로 실시간 변경합니다.
 
 * **Q3. 유저가 회원가입 창에서 이것저것 누르는 동안 IDE 어디가 동작하나요?**
   * 유저가 특정 항목을 고르거나 클릭할 때마다, 해당 컨트롤의 **`Control.Click`** 또는 **`Control.Change`** 이벤트가 실시간으로 동작합니다.
 
 * **Q4. 마지막에 Save 버튼을 누르면 IDE 어느 부분이 동작하나요? (상세 페이지 `AFTER`인가요?)**
   * **`AFTER`가 절대 아닙니다.** (`AFTER`는 창이 열릴 때 이미 완료되어 종료된 상태입니다.)
-  * 저장 시에는 **`BTN_SAVE.Click`** 이벤트와 IDE 속성의 **`MustCheck`**, 그리고 **`SAVEDATA` (DB 커밋 엔진)**가 동작합니다.
+  * 저장 시에는 **`BTN_SAVE.Click`** 이벤트와 IDE 속성의 **`MustCheck`**, 그리고 **`SAVEIT()` / `SAVEDATA` (DB 커밋 엔진)**가 동작합니다.
 
 ---
 
@@ -40,6 +62,5 @@ TROIA 개발 환경은 웹 백엔드의 전형적인 이벤트 기반 **MVC (Mod
 
 ```text
 [1. 메인창 [+] 클릭] ──> [2. 회원가입창 켜짐] ──> [3. 콤보박스 클릭] ──> [4. [저장] 클릭]
-   BTN_ADD.Click          BEFORE -> AFTER -> ONSHOW      Properties(목록)         BTN_SAVE.Click
-                                                         -> GRADE.Click          -> SAVEDATA (DB)
-```
+   BTN_ADD.Click          BEFORE -> AFTER -> ONSHOW     Properties(목록)          BTN_SAVE.Click
+                                                       -> GRADE.Click          -> SAVEDATA (DB)
